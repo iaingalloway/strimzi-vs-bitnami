@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-repo-server
+spec:
+  selector: {}
+  template:
+    spec:
+      containers:
+      - name: kustomized-helm
+        command: [/var/run/argocd/argocd-cmp-server]
+        image: alpine/k8s:1.26.8
+        resources:
+          limits:
+            cpu: 250m
+            memory: 2562Mi
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 999
+        volumeMounts:
+          - mountPath: /var/run/argocd
+            name: var-files
+          - mountPath: /home/argocd/cmp-server/plugins
+            name: plugins
+          - mountPath: /home/argocd/cmp-server/config/plugin.yaml
+            subPath: plugin.yaml
+            name: kustomized-helm
+          - mountPath: /tmp
+            name: cmp-tmp
+      volumes:
+      - configMap:
+          name: kustomized-helm-configmap
+        name: kustomized-helm
+      - emptyDir: {}
+        name: cmp-tmp

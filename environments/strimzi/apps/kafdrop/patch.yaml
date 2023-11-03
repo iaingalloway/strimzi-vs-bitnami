@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: kafdrop
+    app.kubernetes.io/name: kafdrop
+  name: kafdrop
+  namespace: strimzi-vs-bitnami
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: kafdrop
+      app.kubernetes.io/name: kafdrop
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: kafdrop
+        app.kubernetes.io/name: kafdrop
+    spec:
+      containers:
+        - env:
+            - name: KAFKA_BROKERCONNECT
+              value: 'kafka-kafka-bootstrap:9092'
+            - name: KAFKA_PROPERTIES
+              value: ''
+            - name: KAFKA_TRUSTSTORE
+              value: ''
+            - name: KAFKA_KEYSTORE
+              value: ''
+            - name: JVM_OPTS
+              value: ''
+            - name: JMX_PORT
+              value: '8686'
+            - name: HOST
+              value: ''
+            - name: SERVER_SERVLET_CONTEXTPATH
+              value: ''
+            - name: KAFKA_PROPERTIES_FILE
+              value: kafka.properties
+            - name: KAFKA_TRUSTSTORE_FILE
+              value: kafka.truststore.jks
+            - name: KAFKA_KEYSTORE_FILE
+              value: kafka.keystore.jks
+            - name: SERVER_PORT
+              value: '9000'
+            - name: CMD_ARGS
+              value: ''
+          image: 'obsidiandynamics/kafdrop:3.30.0'
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 300
+            periodSeconds: 30
+            timeoutSeconds: 30
+          name: kafdrop
+          ports:
+            - containerPort: 9000
+              name: http
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 60
+          resources:
+            requests:
+              cpu: 1m
+              memory: 128Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            failureThreshold: 60
+            timeoutSeconds: 10

@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+  name: kafdrop
+spec:
+  destination:
+    name: in-cluster
+    namespace: strimzi-vs-bitnami
+  project: default
+  source:
+    path: environments/strimzi/apps/kafdrop
+    plugin:
+      name: kustomized-helm
+    repoURL: git@github.com:iaingalloway/strimzi-vs-bitnami.git
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true

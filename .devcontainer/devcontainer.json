@@ -1,0 +1,12 @@
+{
+  "name": "strimzi-vs-bitnami-devcontainer",
+  "image": "ghcr.io/iaingalloway/devcontainers/base:latest",
+  "features": {
+    "ghcr.io/devcontainers-contrib/features/argo-cd:1": {}
+  },
+  "runArgs": [
+    "--name",
+    "strimzi-vs-bitnami-devcontainer",
+    "--network=host"
+  ]
+}

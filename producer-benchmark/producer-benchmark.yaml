@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kafka-producer-benchmark-output
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kafka-producer-benchmark
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      containers:
+      - name: kafka-producer-benchmark
+        image: gkoenig/kafka-producer-benchmark:0.4
+        args:
+          - "--bootstrap-servers"
+          - "kafka-broker.strimzi-vs-bitnami.svc.cluster.local:9092"
+          - "--topic"
+          - "benchmark"
+          - "--num-records"
+          - "10000000"
+        resources:
+          requests:
+            memory: "2Gi"
+        volumeMounts:
+          - mountPath: /tmp/output
+            name: kafka-producer-benchmark-storage
+      initContainers:
+      - name: kafka-producer-benchmark-permission-fix
+        image: busybox
+        command: ["/bin/chmod","-R","777", "/mountedvol"]
+        volumeMounts:
+        - name: kafka-producer-benchmark-storage
+          mountPath: /mountedvol
+      restartPolicy: Never
+      volumes:
+      - name: kafka-producer-benchmark-storage
+        persistentVolumeClaim:
+          claimName: kafka-producer-benchmark-output
